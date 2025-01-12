@@ -50,8 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# files and folders
 art/exclude/
 music/despath.s3m
 *.sav
 *.gba
-/build/
+build/
