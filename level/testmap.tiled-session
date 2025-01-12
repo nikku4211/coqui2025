@@ -1,0 +1,48 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "testmap.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "testmap.tmx": {
+            "scale": 1,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 126,
+                "y": 196
+            }
+        },
+        "testtile.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.exportedFilePath": "C:/Users/JennyR/Documents/Nikku4211Archive/GBA/GBADev/coqui2025/level",
+    "last.imagePath": "C:/Users/JennyR/Documents/Nikku4211Archive/GBA/GBADev/coqui2025/art",
+    "map.fixedSize": true,
+    "map.height": 32,
+    "map.lastUsedExportFilter": "GBA Coquiman C array (*.c)",
+    "map.lastUsedFormat": "tmx",
+    "map.orientation": 1,
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 32,
+    "openFiles": [
+        "testtile.tsx",
+        "testmap.tmx"
+    ],
+    "project": "testmap.tiled-project",
+    "recentFiles": [
+        "testtile.tsx",
+        "testmap.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
