@@ -77,15 +77,15 @@ void play_update() {
         obj_set_pos(&obj_buffer[5], playxs, playys);
         obj_set_pos(&obj_buffer[4], playxs+8, playys);
         if (playxdirection != oldplayxdirection){
-            obj_set_attr(&obj_buffer[4], ATTR0_TALL, ATTR1_SIZE_32 | ATTR1_HFLIP, ATTR2_PALBANK(0) | 0);
-            obj_set_attr(&obj_buffer[5], ATTR0_TALL, ATTR1_SIZE_16 | ATTR1_HFLIP, ATTR2_PALBANK(0) | 2);
+            obj_buffer[4].attr1 |= ATTR1_HFLIP;
+            obj_buffer[5].attr1 |= ATTR1_HFLIP;
         }
     } else {
         obj_set_pos(&obj_buffer[4], playxs, playys);
         obj_set_pos(&obj_buffer[5], playxs+16, playys);
         if (playxdirection != oldplayxdirection){
-            obj_set_attr(&obj_buffer[4], ATTR0_TALL, ATTR1_SIZE_32, ATTR2_PALBANK(0) | 0);
-            obj_set_attr(&obj_buffer[5], ATTR0_TALL, ATTR1_SIZE_16, ATTR2_PALBANK(0) | 2);
+            obj_buffer[4].attr1 &= ~ATTR1_HFLIP;
+            obj_buffer[5].attr1 &= ~ATTR1_HFLIP;
         }
     }
     obj_set_pos(&obj_buffer[0], playtongxs[0], playtongys[0]);
