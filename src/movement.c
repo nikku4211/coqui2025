@@ -294,15 +294,25 @@ void play_movement() {
         play_state = GRAB;
         playgrabbing = 1;
         
-        playtongx = PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_cos(ArcTan2(playxdirection * SUBPIX_TO_PIX(PLAY_TONG_LENGTH), playydirection * SUBPIX_TO_PIX(PLAY_TONG_LENGTH)))) + playx + PLAY_TONG_X_OFS;
-        playtongy = PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_sin(ArcTan2(playxdirection * SUBPIX_TO_PIX(PLAY_TONG_LENGTH), playydirection * SUBPIX_TO_PIX(PLAY_TONG_LENGTH)))) + playy;
+        if (key_tri_vert() <= 0){
+            if (key_tri_horz() != 0)
+                playtongangle = ArcTan2(playxdirection,playydirection);
+            else
+                playtongangle = ArcTan2(0,playydirection);
+        } else {
+            playtongangle = ArcTan2(playxdirection,0);
+        }
+        
+        playtongx = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playx + PLAY_TONG_X_OFS;
+        playtongy = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_sin(playtongangle))) + playy;
     } else {
         playgrabbing = 0;
     }
     
     #ifdef DEBUG
-        mlog("tongx: %x\t", PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_cos(ArcTan2(playxdirection * SUBPIX_TO_PIX(PLAY_TONG_LENGTH), playydirection * SUBPIX_TO_PIX(PLAY_TONG_LENGTH)))));
-        mlog("tongy: %x\n", PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_sin(ArcTan2(playxdirection * SUBPIX_TO_PIX(PLAY_TONG_LENGTH), playydirection * SUBPIX_TO_PIX(PLAY_TONG_LENGTH)))));
+        mlog("tongx: %x\t", SINLUTR_TO_SUBPIX(lu_cos(playtongangle)));
+        mlog("tongy: %x\n", SINLUTR_TO_SUBPIX(lu_sin(playtongangle)));
+        mlog("angle: %x\n", playtongangle);
     #endif
     playtongxs = SUBPIX_TO_PIX(playtongx) - bgx;
     playtongys = SUBPIX_TO_PIX(playtongy) - bgy;

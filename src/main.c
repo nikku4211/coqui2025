@@ -29,6 +29,7 @@ enum player_state play_state = STAND;
 unsigned int playtongx = 0, playtongy = 0;
 unsigned int playtongxs = 0, playtongys = 0;
 int playtongxv = 0, playtongyv = 0;
+unsigned int playtongangle = 0;
 
 void init_tiles() {
 	// Load palette

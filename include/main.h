@@ -14,8 +14,8 @@
 
 #define PIX_TO_SUBPIX(n) ((n) << 8)
 #define SUBPIX_TO_PIX(n) ((n) >> 8)
-#define PIX_TO_SINLUT(n) ((n) << 12)
-#define SINLUTR_TO_SUBPIX(n) ((n) >> 12)
+#define PIX_TO_SINLUT(n) ((n) << 8)
+#define SINLUTR_TO_SUBPIX(n) ((n) >> 4)
 #define SINLUTA_TO_ATAN2(n) ((n) << 1)
 #define ATAN2_TO_SINLUTA(n) ((n) >> 1)
 
@@ -40,8 +40,8 @@
 //tongue
 #define PLAY_TONG_ACCEL 32
 #define PLAY_TONG_DECEL 16
-#define PLAY_TONG_LENGTH PIX_TO_SUBPIX(64)
-#define PLAY_TONG_END_WIDTH PIX_TO_SUBPIX(16)
+#define PLAY_TONG_LENGTH 64
+#define PLAY_TONG_END_WIDTH 16
 #define PLAY_TONG_X_OFS PIX_TO_SUBPIX(12)
 
 //player states
@@ -67,3 +67,4 @@ extern enum player_state play_state;
 extern unsigned int playtongx, playtongy;
 extern unsigned int playtongxs, playtongys;
 extern int playtongxv, playtongyv;
+extern unsigned int playtongangle;
