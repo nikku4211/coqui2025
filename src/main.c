@@ -13,7 +13,7 @@
 #include "coqmansheet.h"
 
 OBJ_ATTR obj_buffer[128];
-
+OBJ_AFFINE *obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
 
 // Scroll around some
 int bgx= 0, bgy= 0;
@@ -23,13 +23,14 @@ int playxv = 0, playyv = 0; //player x velocity, y velocity
 int playxdirection = 1;
 int playydirection = 0;
 unsigned int playonground = 0;
-unsigned int playgrabbing = 0;
+enum grab_state playgrabbing = NONE;
 enum player_state play_state = STAND;
 
-unsigned int playtongx = 0, playtongy = 0;
-unsigned int playtongxs = 0, playtongys = 0;
+unsigned int playtongx[4], playtongy[4];
+unsigned int playtongxs[4], playtongys[4];
 int playtongxv = 0, playtongyv = 0;
 unsigned int playtongangle = 0;
+int playtonganglev = 0;
 
 void init_tiles() {
 	// Load palette
@@ -45,23 +46,47 @@ void init_play() {
     memcpy32(&tile_mem_obj[0][0], coqmansheet_char, (sizeof(coqmansheet_char) >> 2));
     
     //hardcode player obj entries
-    obj_set_attr(&obj_buffer[2], ATTR0_TALL, ATTR1_SIZE_32, ATTR2_PALBANK(0) | 0);
-    obj_set_pos(&obj_buffer[2], 0, 0);
-    obj_set_attr(&obj_buffer[3], ATTR0_TALL, ATTR1_SIZE_16, ATTR2_PALBANK(0) | 2);
-    obj_set_pos(&obj_buffer[3], 16, 0);
-    obj_set_attr(&obj_buffer[0], ATTR0_SQUARE, ATTR1_SIZE_16, ATTR2_PALBANK(0) | 588);
-    obj_set_pos(&obj_buffer[0], 8, 0);
+    obj_set_attr(&obj_buffer[4], ATTR0_TALL, ATTR1_SIZE_32, ATTR2_PALBANK(0) | 0);
+    obj_set_pos(&obj_buffer[4], 0, 0);
+    obj_set_attr(&obj_buffer[5], ATTR0_TALL, ATTR1_SIZE_16, ATTR2_PALBANK(0) | 2);
+    obj_set_pos(&obj_buffer[5], 16, 0);
+    //player tongue
+    obj_set_attr(&obj_buffer[0], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_8 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 590);
+    obj_set_pos(&obj_buffer[0], 60, 4);
+    obj_aff_identity(&obj_aff_buffer[0]);
     obj_hide(&obj_buffer[0]);
+    obj_set_attr(&obj_buffer[1], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
+    obj_set_pos(&obj_buffer[1], 44, 0);
+    obj_aff_identity(&obj_aff_buffer[1]);
+    obj_hide(&obj_buffer[1]);
+    obj_set_attr(&obj_buffer[2], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
+    obj_set_pos(&obj_buffer[2], 28, 0);
+    obj_aff_identity(&obj_aff_buffer[2]);
+    obj_hide(&obj_buffer[2]);
+    obj_set_attr(&obj_buffer[3], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
+    obj_set_pos(&obj_buffer[3], 12, 0);
+    obj_aff_identity(&obj_aff_buffer[3]);
+    obj_hide(&obj_buffer[3]);
 }
 
 void play_update() {
-    obj_set_pos(&obj_buffer[2], playxs, playys);
-    obj_set_pos(&obj_buffer[3], playxs+16, playys);
-    obj_set_pos(&obj_buffer[0], playtongxs, playtongys);
-    if (playgrabbing) {
-        obj_unhide(&obj_buffer[0], 0);
+    obj_set_pos(&obj_buffer[4], playxs, playys);
+    obj_set_pos(&obj_buffer[5], playxs+16, playys);
+    obj_set_pos(&obj_buffer[0], playtongxs[0], playtongys[0]);
+    obj_set_pos(&obj_buffer[1], playtongxs[1], playtongys[1]);
+    obj_set_pos(&obj_buffer[2], playtongxs[2], playtongys[2]);
+    obj_set_pos(&obj_buffer[3], playtongxs[3], playtongys[3]);
+    if (playgrabbing != NONE) {
+        obj_unhide(&obj_buffer[0], ATTR0_AFF);
+        obj_unhide(&obj_buffer[1], ATTR0_AFF);
+        obj_unhide(&obj_buffer[2], ATTR0_AFF);
+        obj_unhide(&obj_buffer[3], ATTR0_AFF);
+        obj_aff_rotate(&obj_aff_buffer[0], -playtongangle);
     } else {
         obj_hide(&obj_buffer[0]);
+        obj_hide(&obj_buffer[1]);
+        obj_hide(&obj_buffer[2]);
+        obj_hide(&obj_buffer[3]);
     }
 }
 
@@ -122,5 +147,7 @@ int main() {
         play_update();
         
         oam_copy(oam_mem, obj_buffer, 9);	// only need to update a few
+        // we have 1 OBJ_AFFINEs, update these separately
+		obj_aff_copy(obj_aff_mem, obj_aff_buffer, 1);
     }
 }

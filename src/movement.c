@@ -28,15 +28,17 @@ unsigned int is_colliding_bg(unsigned int x, unsigned int y){
 void play_movement() {
     playx += playxv;
     
-    if (!playonground){
-        playy += playyv;
-        if (playyv < PLAY_TOP_GRAV_SPEED) {
-            playyv += PLAY_GRAV_ACCEL;
+    if (playgrabbing != GRABBED){
+        if (!playonground){
+            playy += playyv;
+            if (playyv < PLAY_TOP_GRAV_SPEED) {
+                playyv += PLAY_GRAV_ACCEL;
+            } else {
+                playyv = PLAY_TOP_GRAV_SPEED;
+            }
         } else {
-            playyv = PLAY_TOP_GRAV_SPEED;
+            play_state = STAND;
         }
-    } else {
-        play_state = STAND;
     }
     
     playxs = SUBPIX_TO_PIX(playx) - bgx;
@@ -70,22 +72,23 @@ void play_movement() {
     } else if (playyv > 0) {
         playyv -= PLAY_Y_DECEL;
     } */
-    
-    if (key_tri_horz() < 0) {
-        play_state = RUN;
-        playxdirection = -1;
-        if (playxv > -PLAY_TOP_X_SPEED) {
-            playxv -= PLAY_X_ACCEL;
-        } else {
-            playxv = -PLAY_TOP_X_SPEED;
-        }
-    } else if (key_tri_horz() > 0) {
-        play_state = RUN;
-        playxdirection = 1;
-        if (playxv < PLAY_TOP_X_SPEED) {
-            playxv += PLAY_X_ACCEL;
-        } else {
-            playxv = PLAY_TOP_X_SPEED;
+    if (playgrabbing != GRABBED) {
+        if (key_tri_horz() < 0) {
+            play_state = RUN;
+            playxdirection = -1;
+            if (playxv > -PLAY_TOP_X_SPEED) {
+                playxv -= PLAY_X_ACCEL;
+            } else {
+                playxv = -PLAY_TOP_X_SPEED;
+            }
+        } else if (key_tri_horz() > 0) {
+            play_state = RUN;
+            playxdirection = 1;
+            if (playxv < PLAY_TOP_X_SPEED) {
+                playxv += PLAY_X_ACCEL;
+            } else {
+                playxv = PLAY_TOP_X_SPEED;
+            }
         }
     }
     
@@ -108,7 +111,7 @@ void play_movement() {
         playydirection = 0;
     }
     
-    if (!playonground){
+    if (!playonground && play_state != SWINGFALL){
         play_state = FALL;
     }
     
@@ -291,31 +294,120 @@ void play_movement() {
     }
     
     if (key_held(KEY_R)) {
-        play_state = GRAB;
-        playgrabbing = 1;
-        
-        if (key_tri_vert() <= 0){
-            if (key_tri_horz() != 0)
-                playtongangle = ArcTan2(playxdirection,playydirection);
-            else
-                playtongangle = ArcTan2(0,playydirection);
-        } else {
-            playtongangle = ArcTan2(playxdirection,0);
+        if (play_state != SWINGFALL){
+            if (playgrabbing != GRABBED) {
+                play_state = GRAB;
+                playgrabbing = GRABBING;
+                
+                if (key_tri_vert() < 0){
+                    if (key_tri_horz() != 0)
+                        playtongangle = ArcTan2(playxdirection,playydirection);
+                    else
+                        playtongangle = ArcTan2(0,playydirection);
+                } else {
+                    playtongangle = ArcTan2(playxdirection,0);
+                }
+                
+                playtongx[0] = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playx + PLAY_TONG_X_END_OFS;
+                playtongy[0] = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_sin(playtongangle))) + playy + PLAY_TONG_Y_OFS;
+                playtongx[1] = (38 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playx + PLAY_TONG_X_OFS;
+                playtongy[1] = (38 * SINLUTR_TO_SUBPIX(lu_sin(playtongangle))) + playy;
+                playtongx[2] = (23 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playx + PLAY_TONG_X_OFS;
+                playtongy[2] = (23 * SINLUTR_TO_SUBPIX(lu_sin(playtongangle))) + playy;
+                playtongx[3] = (8 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playx + PLAY_TONG_X_OFS;
+                playtongy[3] = (8 * SINLUTR_TO_SUBPIX(lu_sin(playtongangle))) + playy;
+                
+                unsigned int playtong_left = SUBPIX_TO_PIX(playtongx[0]) + PLAY_TONG_END_TOPLEFT;
+                unsigned int playtong_up = SUBPIX_TO_PIX(playtongy[0]) + PLAY_TONG_END_TOPLEFT;
+                unsigned int playtong_right = SUBPIX_TO_PIX(playtongx[0]) + PLAY_TONG_END_BOTTOMRIGHT;
+                unsigned int playtong_down = SUBPIX_TO_PIX(playtongy[0]) + PLAY_TONG_END_BOTTOMRIGHT;
+                
+                if ((is_colliding_bg(playtong_left, playtong_up) & GRIP) || \
+                    (is_colliding_bg(playtong_right, playtong_up) & GRIP) || \
+                    (is_colliding_bg(playtong_left, playtong_down) & GRIP) || \
+                    (is_colliding_bg(playtong_right, playtong_down) & GRIP)
+                ){
+                    play_state = SWING;
+                    playgrabbing = GRABBED;
+                    if (is_colliding_bg(playtong_left, playtong_up) & GRIP){
+                        playtongx[0] = PIX_TO_SUBPIX(playtong_left & 0xfffff0);
+                        playtongy[0] = PIX_TO_SUBPIX(playtong_up & 0xfffff0);
+                    }else if (is_colliding_bg(playtong_right, playtong_up) & GRIP){
+                        playtongx[0] = PIX_TO_SUBPIX(playtong_right & 0xfffff0);
+                        playtongy[0] = PIX_TO_SUBPIX(playtong_up & 0xfffff0);
+                    }else if (is_colliding_bg(playtong_left, playtong_down) & GRIP){
+                        playtongx[0] = PIX_TO_SUBPIX(playtong_left & 0xfffff0);
+                        playtongy[0] = PIX_TO_SUBPIX(playtong_down & 0xfffff0);
+                    }else if (is_colliding_bg(playtong_right, playtong_down) & GRIP){
+                        playtongx[0] = PIX_TO_SUBPIX(playtong_right & 0xfffff0);
+                        playtongy[0] = PIX_TO_SUBPIX(playtong_down & 0xfffff0);
+                    }
+                    
+                    playtongangle = ArcTan2(playtongx[0] - playx, playtongy[0] - playy);
+                    playxv = 0;
+                    playyv = 0;
+                }
+            } else {
+                int playpendforce = SUBPIX_TO_PIX(SUBPIX_TO_PIX(PLAY_TOP_GRAV_SPEED) * SINLUTR_TO_SUBPIX(lu_cos(playtongangle)));
+            
+                playtonganglev += playpendforce * DIVLUTR_TO_PIX(lu_div(PLAY_TONG_LENGTH));
+                playtongangle -= playtonganglev;
+                
+            #ifdef DEBUG
+                mlog("pendulum force: %x\n", playtonganglev);
+            #endif
+            
+                if (playxv < PLAY_TOP_X_SPEED && playxv > -PLAY_TOP_X_SPEED)
+                    playxv = playtonganglev;
+                else if (playxv > PLAY_TOP_X_SPEED)
+                    playxv = PLAY_TOP_X_SPEED;
+                else
+                    playxv = -PLAY_TOP_X_SPEED;
+                
+                if (playyv < PLAY_TOP_GRAV_SPEED && playyv > -PLAY_TOP_GRAV_SPEED)
+                    playyv = -playtonganglev;
+                else if (playyv > PLAY_TOP_GRAV_SPEED)
+                    playyv = PLAY_TOP_GRAV_SPEED;
+                else
+                    playyv = -PLAY_TOP_GRAV_SPEED;
+                
+                #ifdef DEBUG
+                    mlog("x velocity: %x\n", playxv);
+                    mlog("y velocity: %x\n", playyv);
+                #endif
+                
+                playtongx[1] = (38 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
+                playtongy[1] = (38 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0];
+                playtongx[2] = (23 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
+                playtongy[2] = (23 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0];
+                playtongx[3] = (8 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
+                playtongy[3] = (8 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0];
+                playx = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
+                playy = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0] - PLAY_TONG_Y_OFS;
+                if (key_hit(KEY_A)) {
+                    play_state = SWINGFALL;
+                    playgrabbing = NONE;
+                    playyv -= PLAY_JUMP_SPEED;
+                }
+            }
         }
-        
-        playtongx = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playx + PLAY_TONG_X_OFS;
-        playtongy = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_sin(playtongangle))) + playy;
     } else {
-        playgrabbing = 0;
+        playgrabbing = NONE;
     }
     
     #ifdef DEBUG
-        mlog("tongx: %x\t", SINLUTR_TO_SUBPIX(lu_cos(playtongangle)));
-        mlog("tongy: %x\n", SINLUTR_TO_SUBPIX(lu_sin(playtongangle)));
-        mlog("angle: %x\n", playtongangle);
+        //mlog("tongx: %x\t", playtongx);
+        //mlog("tongy: %x\n", playtongy);
+        //mlog("angle: %x\n", playtongangle);
     #endif
-    playtongxs = SUBPIX_TO_PIX(playtongx) - bgx;
-    playtongys = SUBPIX_TO_PIX(playtongy) - bgy;
+    playtongxs[0] = SUBPIX_TO_PIX(playtongx[0]) - bgx;
+    playtongys[0] = SUBPIX_TO_PIX(playtongy[0]) - bgy;
+    playtongxs[1] = SUBPIX_TO_PIX(playtongx[1]) - bgx;
+    playtongys[1] = SUBPIX_TO_PIX(playtongy[1]) - bgy;
+    playtongxs[2] = SUBPIX_TO_PIX(playtongx[2]) - bgx;
+    playtongys[2] = SUBPIX_TO_PIX(playtongy[2]) - bgy;
+    playtongxs[3] = SUBPIX_TO_PIX(playtongx[3]) - bgx;
+    playtongys[3] = SUBPIX_TO_PIX(playtongy[3]) - bgy;
 #ifdef DEBUG
     //mlog("%d", play_state);
 #endif
