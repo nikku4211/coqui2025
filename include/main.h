@@ -41,7 +41,7 @@
 //tongue
 #define PLAY_TONG_ACCEL 32
 #define PLAY_TONG_DECEL 16
-#define PLAY_TONG_LENGTH 45 //minus end
+#define PLAY_TONG_LENGTH 48 //minus end
 #define PLAY_TONG_END_TOPLEFT 6
 #define PLAY_TONG_END_BOTTOMRIGHT 10
 #define PLAY_TONG_X_OFS PIX_TO_SUBPIX(4)
@@ -79,5 +79,5 @@ extern enum player_state play_state;
 extern unsigned int playtongx[4], playtongy[4];
 extern unsigned int playtongxs[4], playtongys[4];
 extern int playtongxv, playtongyv;
-extern unsigned int playtongangle;
+extern int playtongangle;
 extern int playtonganglev;

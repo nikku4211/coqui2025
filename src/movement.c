@@ -376,13 +376,13 @@ void play_movement() {
                     mlog("y velocity: %x\n", playyv);
                 #endif
                 
-                playtongx[1] = (38 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
-                playtongy[1] = (38 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0];
-                playtongx[2] = (23 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
-                playtongy[2] = (23 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0];
-                playtongx[3] = (8 * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
-                playtongy[3] = (8 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0];
-                playx = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_cos(playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
+                playtongx[1] = (41 * SINLUTR_TO_SUBPIX(lu_cos(32768-playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
+                playtongy[1] = (41 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0] - PLAY_TONG_Y_OFS;
+                playtongx[2] = (26 * SINLUTR_TO_SUBPIX(lu_cos(32768-playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
+                playtongy[2] = (26 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0] - PLAY_TONG_Y_OFS;
+                playtongx[3] = (11 * SINLUTR_TO_SUBPIX(lu_cos(32768-playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
+                playtongy[3] = (11 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0] - PLAY_TONG_Y_OFS;
+                playx = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_cos(32768-playtongangle))) + playtongx[0] - PLAY_TONG_X_END_OFS;
                 playy = (PLAY_TONG_LENGTH * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0] - PLAY_TONG_Y_OFS;
                 if (key_hit(KEY_A)) {
                     play_state = SWINGFALL;

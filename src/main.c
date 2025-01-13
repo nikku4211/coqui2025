@@ -29,7 +29,7 @@ enum player_state play_state = STAND;
 unsigned int playtongx[4], playtongy[4];
 unsigned int playtongxs[4], playtongys[4];
 int playtongxv = 0, playtongyv = 0;
-unsigned int playtongangle = 0;
+int playtongangle = 0;
 int playtonganglev = 0;
 
 void init_tiles() {
