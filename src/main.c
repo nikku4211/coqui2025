@@ -22,6 +22,8 @@ unsigned int playxs = 0, playys = 0; //player x screen, y screen
 int playxv = 0, playyv = 0; //player x velocity, y velocity
 int playxdirection = 1;
 int playydirection = 0;
+int oldplayxdirection = 1;
+int oldplayydirection = 0;
 unsigned int playonground = 0;
 enum grab_state playgrabbing = NONE;
 enum player_state play_state = STAND;
@@ -54,39 +56,47 @@ void init_play() {
     obj_set_attr(&obj_buffer[0], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_8 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 590);
     obj_set_pos(&obj_buffer[0], 60, 4);
     obj_aff_identity(&obj_aff_buffer[0]);
-    obj_hide(&obj_buffer[0]);
+    
     obj_set_attr(&obj_buffer[1], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
     obj_set_pos(&obj_buffer[1], 44, 0);
     obj_aff_identity(&obj_aff_buffer[1]);
-    obj_hide(&obj_buffer[1]);
+    
     obj_set_attr(&obj_buffer[2], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
     obj_set_pos(&obj_buffer[2], 28, 0);
     obj_aff_identity(&obj_aff_buffer[2]);
-    obj_hide(&obj_buffer[2]);
+    
     obj_set_attr(&obj_buffer[3], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
     obj_set_pos(&obj_buffer[3], 12, 0);
     obj_aff_identity(&obj_aff_buffer[3]);
-    obj_hide(&obj_buffer[3]);
+    
+    obj_hide_multi(&obj_buffer[0], 4);
 }
 
 void play_update() {
-    obj_set_pos(&obj_buffer[4], playxs, playys);
-    obj_set_pos(&obj_buffer[5], playxs+16, playys);
+    if (playxdirection < 0) {
+        obj_set_pos(&obj_buffer[5], playxs, playys);
+        obj_set_pos(&obj_buffer[4], playxs+8, playys);
+        if (playxdirection != oldplayxdirection){
+            obj_set_attr(&obj_buffer[4], ATTR0_TALL, ATTR1_SIZE_32 | ATTR1_HFLIP, ATTR2_PALBANK(0) | 0);
+            obj_set_attr(&obj_buffer[5], ATTR0_TALL, ATTR1_SIZE_16 | ATTR1_HFLIP, ATTR2_PALBANK(0) | 2);
+        }
+    } else {
+        obj_set_pos(&obj_buffer[4], playxs, playys);
+        obj_set_pos(&obj_buffer[5], playxs+16, playys);
+        if (playxdirection != oldplayxdirection){
+            obj_set_attr(&obj_buffer[4], ATTR0_TALL, ATTR1_SIZE_32, ATTR2_PALBANK(0) | 0);
+            obj_set_attr(&obj_buffer[5], ATTR0_TALL, ATTR1_SIZE_16, ATTR2_PALBANK(0) | 2);
+        }
+    }
     obj_set_pos(&obj_buffer[0], playtongxs[0], playtongys[0]);
     obj_set_pos(&obj_buffer[1], playtongxs[1], playtongys[1]);
     obj_set_pos(&obj_buffer[2], playtongxs[2], playtongys[2]);
     obj_set_pos(&obj_buffer[3], playtongxs[3], playtongys[3]);
     if (playgrabbing != NONE) {
-        obj_unhide(&obj_buffer[0], ATTR0_AFF);
-        obj_unhide(&obj_buffer[1], ATTR0_AFF);
-        obj_unhide(&obj_buffer[2], ATTR0_AFF);
-        obj_unhide(&obj_buffer[3], ATTR0_AFF);
+        obj_unhide_multi(&obj_buffer[0], ATTR0_AFF, 4);
         obj_aff_rotate(&obj_aff_buffer[0], -playtongangle);
     } else {
-        obj_hide(&obj_buffer[0]);
-        obj_hide(&obj_buffer[1]);
-        obj_hide(&obj_buffer[2]);
-        obj_hide(&obj_buffer[3]);
+        obj_hide_multi(&obj_buffer[0], 4);
     }
 }
 
@@ -138,6 +148,9 @@ int main() {
     while(1){
         VBlankIntrWait();
         key_poll();
+        
+        oldplayxdirection = playxdirection;
+        oldplayydirection = playydirection;
         
         play_movement();
 

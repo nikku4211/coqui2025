@@ -354,7 +354,7 @@ void play_movement() {
                 playtongangle -= playtonganglev;
                 
             #ifdef DEBUG
-                mlog("pendulum force: %x\n", playtonganglev);
+                //mlog("pendulum force: %x\n", playtonganglev);
             #endif
             
                 if (playxv < PLAY_TOP_X_SPEED && playxv > -PLAY_TOP_X_SPEED)
@@ -371,11 +371,6 @@ void play_movement() {
                 else
                     playyv = -PLAY_TOP_GRAV_SPEED;
                 
-                #ifdef DEBUG
-                    mlog("x velocity: %x\n", playxv);
-                    mlog("y velocity: %x\n", playyv);
-                #endif
-                
                 playtongx[1] = (41 * SINLUTR_TO_SUBPIX(lu_cos(32768-playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
                 playtongy[1] = (41 * SINLUTR_TO_SUBPIX(lu_sin(-playtongangle))) + playtongy[0] - PLAY_TONG_Y_OFS;
                 playtongx[2] = (26 * SINLUTR_TO_SUBPIX(lu_cos(32768-playtongangle))) + playtongx[0] - PLAY_TONG_X_OFS;
@@ -387,18 +382,25 @@ void play_movement() {
                 if (key_hit(KEY_A)) {
                     play_state = SWINGFALL;
                     playgrabbing = NONE;
-                    playyv -= PLAY_JUMP_SPEED;
+                    //set the player velocities to play nice with deceleration code
+                    playyv = (playyv & 0xfffffff0) - PLAY_JUMP_SPEED;
+                    playxv &= 0xfffffff0;
                 }
             }
         }
-    } else {
+    } else if (key_released(KEY_R)) {
         playgrabbing = NONE;
+        //set the player velocities to play nice with deceleration code
+        playyv &= 0xfffffff0;
+        playxv &= 0xfffffff0;
     }
     
     #ifdef DEBUG
         //mlog("tongx: %x\t", playtongx);
         //mlog("tongy: %x\n", playtongy);
         //mlog("angle: %x\n", playtongangle);
+        mlog("x velocity: %x\n", playxv);
+        mlog("y velocity: %x\n", playyv);
     #endif
     playtongxs[0] = SUBPIX_TO_PIX(playtongx[0]) - bgx;
     playtongys[0] = SUBPIX_TO_PIX(playtongy[0]) - bgy;
