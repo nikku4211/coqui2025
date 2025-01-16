@@ -2,9 +2,10 @@
  Coquiman but as an actual GBA game.
 
 ## Dependencies
- To build, you need both:
+ To build, you need:
 - [PTexConv](https://github.com/Garhoogin/ptexconv)
 - [DevKitARM](https://devkitpro.org/wiki/Getting_Started)
+- [Python](https://www.python.org/)
 
  To run this GBA game, you need either:
 - A GBA emulator on PC like [recent pre-release versions of Mesen](https://mesen.ca/)

@@ -78,10 +78,11 @@ void metasprite_build(unsigned int oamindex, unsigned int x, unsigned int y, con
         obj_set_attr(&obj_buffer[oamindex + j], ((frame[i+3] & 0b0011000000000000) << 2), ((frame[i+3] & ATTR1_SIZE_MASK)) | (hflip << 12) | (vflip << 13), frame[i+2]);
         #ifdef DEBUG
         mlog("sprite number: %d", oamindex+j);
+        mlog("metasprite size: %d", (sizeof(frame)<<1));
         mlog("sprite shape: %x", ((frame[i+3] & 0b0011000000000000) << 2)); //attr0 shape mask is shifted right 2 bits and then shifted left again
         mlog("sprite size: %x", ((frame[i+3] & ATTR1_SIZE_MASK)));
         #endif
-        obj_set_pos(&obj_buffer[oamindex + j], x + (hflip ? (~frame[i+1]) + 32 : frame[i+1]), y + (vflip ? (~frame[i]) + 8 : frame[i]));
+        obj_set_pos(&obj_buffer[oamindex + j], x + frame[i+1+(hflip*(sizeof(frame)<<1))], y + frame[i+(vflip*(sizeof(frame)<<2))]);
     }
 }
 

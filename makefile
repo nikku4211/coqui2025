@@ -179,10 +179,10 @@ $(OFILES_SOURCES) : $(HFILES)
 #---------------------------------------------------------------------------------
 # this rule converts aseprite sprite sheet jsons to c metasprites via python
 #---------------------------------------------------------------------------------
-%_metasprite.c: %.json
+%_metasprite.c %_metasprite.h &: %.json
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
-	@$(py) ../tools/asejsontoc.py $< $@
+	@$(py) ../tools/asejsontoc.py $< $(basename $@).c
 
 #---------------------------------------------------------------------------------
 # This rule creates assembly source files using grit
