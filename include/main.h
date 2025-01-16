@@ -27,6 +27,7 @@
 #define PLAY_BOTTOM 31
 #define PLAY_X_ACCEL 32
 #define PLAY_X_DECEL 16
+#define PLAY_X_WIND_RESIST 8
 #define PLAY_TOP_X_SPEED PIX_TO_SUBPIX(2)
 //gravity
 #define PLAY_GRAV_ACCEL 32
@@ -39,9 +40,10 @@
 #define PLAY_TOP_Y_SPEED PIX_TO_SUBPIX(2)
 
 //tongue
-#define PLAY_TONG_ACCEL 32
-#define PLAY_TONG_DECEL 16
-#define PLAY_TONG_LENGTH 48 //minus end
+#define PLAY_TONG_ACCEL 256
+#define PLAY_TONG_ANGLE_ROTATE 1024
+#define PLAY_TONG_GRAB_ACCEL 128
+#define PLAY_TONG_INIT_LENGTH PIX_TO_SUBPIX(42)
 #define PLAY_TONG_END_TOPLEFT 6
 #define PLAY_TONG_END_BOTTOMRIGHT 10
 #define PLAY_TONG_X_OFS PIX_TO_SUBPIX(4)
@@ -78,6 +80,13 @@ extern enum player_state play_state;
 
 extern unsigned int playtongx[4], playtongy[4];
 extern unsigned int playtongxs[4], playtongys[4];
-extern int playtongxv, playtongyv;
-extern int playtongangle;
-extern int playtonganglev;
+extern int playtongv;
+extern s16 playtongangle;
+extern s16 playtonganglegoal;
+extern s16 playtonganglev;
+extern int playtonglength;
+
+struct spranim_data {
+    const u16 * const anim_pointer;
+    u16 duration;
+};

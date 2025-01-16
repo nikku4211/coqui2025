@@ -14,6 +14,7 @@ include $(DEVKITARM)/gba_rules
 LIBTONC := $(DEVKITPRO)/libtonc
 grit := ../tools/grit.exe
 ptexconv := ../tools/ptexconv_x64.exe
+py := python
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -91,6 +92,7 @@ CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 PNGFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.raw)))
+JSONFILES	:=	$(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.json)))
 
 ifneq ($(strip $(MUSIC)),)
 	export AUDIOFILES	:=	$(foreach dir,$(notdir $(wildcard $(MUSIC)/*.*)),$(CURDIR)/$(MUSIC)/$(dir))
@@ -115,11 +117,11 @@ export OFILES_BIN := $(addsuffix .o,$(BINFILES))
 
 export OFILES_SOURCES := $(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
 
-export OFILES_GRAPHICS := $(PNGFILES:.png=.o)
+export OFILES_GRAPHICS := $(PNGFILES:.png=.o) $(JSONFILES:.json=_metasprite.o)
 
 export OFILES := $(OFILES_BIN) $(OFILES_SOURCES) $(OFILES_GRAPHICS) $(OFILES_SAMPLES)
 
-export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES))) $(PNGFILES:.png=.h)
+export HFILES := $(addsuffix .h,$(subst .,_,$(BINFILES))) $(PNGFILES:.png=.h) $(JSONFILES:.json=_metasprite.h)
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-iquote $(CURDIR)/$(dir)) \
 					$(foreach dir,$(LEVELS),-iquote $(CURDIR)/$(dir)) \
@@ -173,6 +175,14 @@ $(OFILES_SOURCES) : $(HFILES)
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@$(bin2o)
+
+#---------------------------------------------------------------------------------
+# this rule converts aseprite sprite sheet jsons to c metasprites via python
+#---------------------------------------------------------------------------------
+%_metasprite.c: %.json
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(py) ../tools/asejsontoc.py $< $@
 
 #---------------------------------------------------------------------------------
 # This rule creates assembly source files using grit

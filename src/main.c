@@ -11,12 +11,15 @@
 
 #include "testtileset.h"
 #include "coqmansheet.h"
+#include "coqmansheet_metasprite.h"
 
 OBJ_ATTR obj_buffer[128];
 OBJ_AFFINE *obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
 
 // Scroll around some
 int bgx= 0, bgy= 0;
+
+//player values
 unsigned int playx = PIX_TO_SUBPIX(48), playy = PIX_TO_SUBPIX(32);
 unsigned int playxs = 0, playys = 0; //player x screen, y screen
 int playxv = 0, playyv = 0; //player x velocity, y velocity
@@ -30,9 +33,11 @@ enum player_state play_state = STAND;
 
 unsigned int playtongx[4], playtongy[4];
 unsigned int playtongxs[4], playtongys[4];
-int playtongxv = 0, playtongyv = 0;
-int playtongangle = 0;
-int playtonganglev = 0;
+int playtongv = 0;
+s16 playtongangle = 0;
+s16 playtonganglegoal = 0;
+s16 playtonganglev = 0;
+int playtonglength = 0;
 
 void init_tiles() {
 	// Load palette
@@ -47,53 +52,63 @@ void init_play() {
     //Load player tiles
     memcpy32(&tile_mem_obj[0][0], coqmansheet_char, (sizeof(coqmansheet_char) >> 2));
     
-    //hardcode player obj entries
-    obj_set_attr(&obj_buffer[4], ATTR0_TALL, ATTR1_SIZE_32, ATTR2_PALBANK(0) | 0);
-    obj_set_pos(&obj_buffer[4], 0, 0);
-    obj_set_attr(&obj_buffer[5], ATTR0_TALL, ATTR1_SIZE_16, ATTR2_PALBANK(0) | 2);
-    obj_set_pos(&obj_buffer[5], 16, 0);
     //player tongue
-    obj_set_attr(&obj_buffer[0], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_8 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 590);
+    obj_set_attr(&obj_buffer[0], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_8 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 630);
     obj_set_pos(&obj_buffer[0], 60, 4);
     obj_aff_identity(&obj_aff_buffer[0]);
     
-    obj_set_attr(&obj_buffer[1], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
+    obj_set_attr(&obj_buffer[1], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 628);
     obj_set_pos(&obj_buffer[1], 44, 0);
     obj_aff_identity(&obj_aff_buffer[1]);
     
-    obj_set_attr(&obj_buffer[2], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
+    obj_set_attr(&obj_buffer[2], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 628);
     obj_set_pos(&obj_buffer[2], 28, 0);
     obj_aff_identity(&obj_aff_buffer[2]);
     
-    obj_set_attr(&obj_buffer[3], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 588);
+    obj_set_attr(&obj_buffer[3], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 628);
     obj_set_pos(&obj_buffer[3], 12, 0);
     obj_aff_identity(&obj_aff_buffer[3]);
     
     obj_hide_multi(&obj_buffer[0], 4);
 }
 
+void metasprite_build(unsigned int oamindex, unsigned int x, unsigned int y, const u16 * frame, unsigned int hflip, unsigned int vflip) {
+    //always know how many sprites each metasprite frame takes before calling
+    for (int i = 0, j = 0; i < (sizeof(frame)<<1); i+=4, j++){
+        obj_set_attr(&obj_buffer[oamindex + j], ((frame[i+3] & 0b0011000000000000) << 2), ((frame[i+3] & ATTR1_SIZE_MASK)) | (hflip << 12) | (vflip << 13), frame[i+2]);
+        #ifdef DEBUG
+        mlog("sprite number: %d", oamindex+j);
+        mlog("sprite shape: %x", ((frame[i+3] & 0b0011000000000000) << 2)); //attr0 shape mask is shifted right 2 bits and then shifted left again
+        mlog("sprite size: %x", ((frame[i+3] & ATTR1_SIZE_MASK)));
+        #endif
+        obj_set_pos(&obj_buffer[oamindex + j], x + (hflip ? (~frame[i+1]) + 32 : frame[i+1]), y + (vflip ? (~frame[i]) + 8 : frame[i]));
+    }
+}
+
 void play_update() {
     if (playxdirection < 0) {
-        obj_set_pos(&obj_buffer[5], playxs, playys);
-        obj_set_pos(&obj_buffer[4], playxs+8, playys);
-        if (playxdirection != oldplayxdirection){
-            obj_buffer[4].attr1 |= ATTR1_HFLIP;
-            obj_buffer[5].attr1 |= ATTR1_HFLIP;
-        }
+        metasprite_build(4, playxs - 8, playys - 8, coqman__stand_0, 1, 0);
     } else {
-        obj_set_pos(&obj_buffer[4], playxs, playys);
-        obj_set_pos(&obj_buffer[5], playxs+16, playys);
-        if (playxdirection != oldplayxdirection){
-            obj_buffer[4].attr1 &= ~ATTR1_HFLIP;
-            obj_buffer[5].attr1 &= ~ATTR1_HFLIP;
-        }
+        metasprite_build(4, playxs - 8, playys - 8, coqman__stand_0, 0, 0);
     }
-    obj_set_pos(&obj_buffer[0], playtongxs[0], playtongys[0]);
-    obj_set_pos(&obj_buffer[1], playtongxs[1], playtongys[1]);
-    obj_set_pos(&obj_buffer[2], playtongxs[2], playtongys[2]);
-    obj_set_pos(&obj_buffer[3], playtongxs[3], playtongys[3]);
     if (playgrabbing != NONE) {
-        obj_unhide_multi(&obj_buffer[0], ATTR0_AFF, 4);
+        obj_unhide(&obj_buffer[0], ATTR0_AFF);
+        obj_set_pos(&obj_buffer[0], playtongxs[0], playtongys[0]);
+        if (playtonglength >= PIX_TO_SUBPIX(36)){
+            obj_unhide(&obj_buffer[1], ATTR0_AFF);
+            obj_set_pos(&obj_buffer[1], playtongxs[1], playtongys[1]);
+        }else
+            obj_hide(&obj_buffer[1]);
+        if (playtonglength >= PIX_TO_SUBPIX(24)){
+            obj_unhide(&obj_buffer[2], ATTR0_AFF);
+            obj_set_pos(&obj_buffer[2], playtongxs[2], playtongys[2]);
+        }else
+            obj_hide(&obj_buffer[2]);
+        if (playtonglength >= PIX_TO_SUBPIX(12)){
+            obj_unhide(&obj_buffer[3], ATTR0_AFF);
+            obj_set_pos(&obj_buffer[3], playtongxs[3], playtongys[3]);
+        }else
+            obj_hide(&obj_buffer[3]);
         obj_aff_rotate(&obj_aff_buffer[0], -playtongangle);
     } else {
         obj_hide_multi(&obj_buffer[0], 4);
@@ -141,7 +156,9 @@ int main() {
 	irq_init(master_isrs[0]);
     irq_add(II_VBLANK, NULL);
     
+    #ifdef DEBUG
     mlog("Game start.\n");
+    #endif
     REG_BG0CNT= BG_CBB(0) | BG_SBB(28) | BG_4BPP | BG_REG_64x64;
     REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_2D;
     
