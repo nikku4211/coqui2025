@@ -89,10 +89,12 @@ void play_movement() {
     } */
     if (playgrabbing != GRABBED) {
         if (key_tri_horz() < 0) {
-            play_state = RUN;
-            play_anim = run_anim;
-            if (key_hit(KEY_LEFT))
-                play_anim_counter = 0;
+            if (playonground){
+                play_state = RUN;
+                play_anim = run_anim;
+                if (key_hit(KEY_LEFT))
+                    play_anim_counter = 0;
+            }
             playxdirection = -1;
             if (playxv > -PLAY_TOP_X_SPEED) {
                 playxv -= PLAY_X_ACCEL;
@@ -100,10 +102,12 @@ void play_movement() {
                 playxv = -PLAY_TOP_X_SPEED;
             }
         } else if (key_tri_horz() > 0) {
-            play_state = RUN;
-            play_anim = run_anim;
-            if (key_hit(KEY_RIGHT))
-                play_anim_counter = 0;
+            if (playonground){
+                play_state = RUN;
+                play_anim = run_anim;
+                if (key_hit(KEY_RIGHT))
+                    play_anim_counter = 0;
+            }
             playxdirection = 1;
             if (playxv < PLAY_TOP_X_SPEED) {
                 playxv += PLAY_X_ACCEL;
@@ -245,17 +249,29 @@ void play_movement() {
                 //mlog("up fast col\n");
             #endif
             }
-        } else if (playyv > 0) {          
-            if ((collision_down) && \
+        }  else if (playyv > 0) {
+            if ((collision_down == 1) && \
             (!collision_up) && \
             playy_down < 1024
             ){
+                play_anim = stand_anim;
+                play_frame_index = 0;
+                play_frame = coqman__stand_0;
+                play_anim_counter = -1;
+                
                 playonground = 1;
                 playy -= PIX_TO_SUBPIX(eject_down);
                 playyv = PIX_TO_SUBPIX(0);
             #ifdef DEBUG
-                //mlog("down fast col\n");
+                //mlog("down slow col\n");
             #endif
+            } else {
+                play_anim = jump_anim;
+                if (play_anim != jump_anim){
+                    play_frame_index = 0;
+                
+                    play_anim_counter = 1;
+                }
             }
         } else {
             if ((!collision_down)){
@@ -299,12 +315,24 @@ void play_movement() {
         (!collision_up) && \
         playy_down < 1024
         ){
+            play_anim = stand_anim;
+            play_frame_index = 0;
+            play_frame = coqman__stand_0;
+            play_anim_counter = -1;
+            
             playonground = 1;
             playy -= PIX_TO_SUBPIX(eject_down);
             playyv = PIX_TO_SUBPIX(0);
         #ifdef DEBUG
             //mlog("down slow col\n");
         #endif
+        } else {
+            play_anim = jump_anim;
+            if (play_anim != jump_anim){
+                play_frame_index = 0;
+            
+                play_anim_counter = 1;
+            }
         }
     } else {
         if ((!collision_down)){
@@ -315,6 +343,7 @@ void play_movement() {
     if (key_hit(KEY_A) && playonground) {
         play_anim = jump_anim;
         play_frame_index = 0;
+        play_frame = coqman__jump_0;
         play_anim_counter = -1;
         playyv = -PLAY_JUMP_SPEED;
         playonground = 0;

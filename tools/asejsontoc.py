@@ -75,12 +75,12 @@ def main(argv):
                         k += spritesteph
                         khw += 4
                     j += spritestepv
-                
+                    jhw += 1
                 tobecount += 3
                 carraytobe += ["-1,\n"]
                 carraytobeh += ["-1,\n"]
                 carraytobev += ["-1,\n"]
-                carraytobe[0] = "const s16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "] = {\n" + str(khw+1) + ",\n"
+                carraytobe[0] = "const s16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "] = {\n" + str((jhw*khw)+1) + ",\n"
                 
                 cheader.write("extern const s16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "];\n")
                 carray.write(" ".join(carraytobe) + " ".join(carraytobeh) + " ".join(carraytobev) + " ".join(carraytobehv) + "};\n")
