@@ -6,8 +6,8 @@
 
 #define PLAY_RIGHT_SCROLL_AREA 120
 #define PLAY_LEFT_SCROLL_AREA 104
-#define PLAY_UP_SCROLL_AREA 56
-#define PLAY_DOWN_SCROLL_AREA 72
+#define PLAY_UP_SCROLL_AREA 64
+#define PLAY_DOWN_SCROLL_AREA 64
 
 #define SCROLL_LIMIT_RIGHT 272
 #define SCROLL_LIMIT_DOWN 336
@@ -69,14 +69,18 @@ enum grab_state {
 
 // Scroll around some
 extern int bgx, bgy;
-extern unsigned int playx, playy;
-extern unsigned int playxs, playys; //player x screen, y screen
+extern int playx, playy;
+extern int playxs, playys; //player x screen, y screen
 extern int playxv, playyv; //player x velocity, y velocity
 extern int playxdirection;
 extern int playydirection;
 extern unsigned int playonground;
 extern enum grab_state playgrabbing;
 extern enum player_state play_state;
+extern const s16* play_frame;
+extern unsigned int play_frame_index;
+extern const struct spranim_data* play_anim;
+extern int play_anim_counter;
 
 extern unsigned int playtongx[4], playtongy[4];
 extern unsigned int playtongxs[4], playtongys[4];
@@ -87,6 +91,6 @@ extern s16 playtonganglev;
 extern int playtonglength;
 
 struct spranim_data {
-    const u16 * const anim_pointer;
-    u16 duration;
+    const s16 * const anim_pointer;
+    s16 duration;
 };

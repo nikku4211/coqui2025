@@ -22,7 +22,7 @@ def main(argv):
             cheader.write("#include \"main.h\"\n")
             
             for i in range(len(sheetdata["frames"])):
-                tobecount = 0
+                tobecount = 1
                 carraytobe = []
                 carraytobe += ["const u16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[] = {\n"]
                 carraytobeh = []
@@ -31,7 +31,8 @@ def main(argv):
                 print("frame " + str(i))
                 spritestepv = 64
                 j = 0
-                je = sheetdata["frames"][i]["spriteSourceSize"]["h"]
+                je = sheetdata["frames"][i]["spriteSourceSize"]["h"] - sheetdata["frames"][i]["spriteSourceSize"]["y"]
+                jhw = 0
                 while j < sheetdata["frames"][i]["spriteSourceSize"]["h"]:
                     if 32 <= (sheetdata["frames"][i]["spriteSourceSize"]["h"] - j) < 64:
                         spritestepv = 32
@@ -49,7 +50,8 @@ def main(argv):
                     else:
                         spritesteph = 32
                     k = 0
-                    ke = sheetdata["frames"][i]["spriteSourceSize"]["w"]
+                    ke = sheetdata["frames"][i]["spriteSourceSize"]["w"] - sheetdata["frames"][i]["spriteSourceSize"]["x"]
+                    khw = 0
                     while k < sheetdata["frames"][i]["spriteSourceSize"]["w"]:
                         if 32 <= (sheetdata["frames"][i]["spriteSourceSize"]["w"] - k) < 64:
                             spritesteph = 32
@@ -67,25 +69,33 @@ def main(argv):
                         ke -= spritesteph
                         print(str(spritesteph) + " by " + str(spritestepv))
                         carraytobe += [str(j + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(k + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(round(((sheetdata["frames"][i]["frame"]["y"] + j) * 4) + (sheetdata["frames"][i]["frame"]["x"] + k) / 8)) + ","  + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ",\n"]
-                        carraytobeh += [str(j + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(ke + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(round(((sheetdata["frames"][i]["frame"]["y"] + j) * 4) + (sheetdata["frames"][i]["frame"]["x"] + k) / 8)) + ","  + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ",\n"]
-                        carraytobev += [str(je + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(k + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(round(((sheetdata["frames"][i]["frame"]["y"] + j) * 4) + (sheetdata["frames"][i]["frame"]["x"] + k) / 8)) + ","  + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ",\n"]
+                        carraytobeh += [str(j + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(ke + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(round(((sheetdata["frames"][i]["frame"]["y"] + j) * 4) + (sheetdata["frames"][i]["frame"]["x"] + ke) / 8)) + ","  + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ",\n"]
+                        carraytobev += [str(je + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(k + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(round(((sheetdata["frames"][i]["frame"]["y"] + je) * 4) + (sheetdata["frames"][i]["frame"]["x"] + k) / 8)) + ","  + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ",\n"]
                         tobecount += 12
                         k += spritesteph
+                        khw += 4
                     j += spritestepv
                 
-                carraytobe[0] = "const u16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "] = {\n"
+                tobecount += 3
+                carraytobe += ["-1,\n"]
+                carraytobeh += ["-1,\n"]
+                carraytobev += ["-1,\n"]
+                carraytobe[0] = "const s16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "] = {\n" + str(khw+1) + ",\n"
                 
-                cheader.write("extern const u16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "];\n")
+                cheader.write("extern const s16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "];\n")
                 carray.write(" ".join(carraytobe) + " ".join(carraytobeh) + " ".join(carraytobev) + " ".join(carraytobehv) + "};\n")
                 
             for i in range(len(sheetdata["meta"]["frameTags"])):
-                carray.write("const struct spranim_data " + sheetdata["meta"]["frameTags"][i]["name"].replace(" ","_") + "_anim[" + str(len(sheetdata["meta"]["frameTags"][i])) + "] = {\n")
-                cheader.write("extern const struct spranim_data " + sheetdata["meta"]["frameTags"][i]["name"].replace(" ","_") + "_anim[" + str(len(sheetdata["meta"]["frameTags"][i])) + "];\n")
-                for j in range(len(sheetdata["meta"]["frameTags"][i])):
+                carray.write("const struct spranim_data " + sheetdata["meta"]["frameTags"][i]["name"].replace(" ","_") + "_anim[" + str((sheetdata["meta"]["frameTags"][i]["to"] - sheetdata["meta"]["frameTags"][i]["from"]) + 2) + "] = {\n")
+                cheader.write("extern const struct spranim_data " + sheetdata["meta"]["frameTags"][i]["name"].replace(" ","_") + "_anim[" + str((sheetdata["meta"]["frameTags"][i]["to"] - sheetdata["meta"]["frameTags"][i]["from"]) + 2) + "];\n")
+                for j in range(sheetdata["meta"]["frameTags"][i]["from"], sheetdata["meta"]["frameTags"][i]["to"] + 1):
                     carray.write("{" + sheetdata["frames"][j]["filename"].replace(" ","_").replace("#","_") + ", ")
-                    carray.write(str(round(sheetdata["frames"][j]["duration"]/(1000/60))) + "},\n")
+                    if (sheetdata["meta"]["frameTags"][i]["to"] + 1) - sheetdata["meta"]["frameTags"][i]["from"] > 1:
+                        carray.write(str(round(sheetdata["frames"][j]["duration"]/(1000/60))) + "},\n")
+                    else:
+                        carray.write("-1},\n")
                 
-                carray.write("};\n")
+                carray.write("{" + sheetdata["frames"][0]["filename"].replace(" ","_").replace("#","_") +", 0}\n};\n")
                 
             carray.close()
             cheader.close()

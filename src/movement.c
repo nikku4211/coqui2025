@@ -8,6 +8,7 @@
 
 #include "metatiles.h"
 #include "testmap_tilemap.h"
+#include "coqmansheet_metasprite.h"
 
 unsigned int is_colliding_aabb(unsigned int x1, unsigned int y1, unsigned int width1, unsigned int height1, \
                                unsigned int x2, unsigned int y2, unsigned int width2, unsigned int height2){
@@ -89,6 +90,9 @@ void play_movement() {
     if (playgrabbing != GRABBED) {
         if (key_tri_horz() < 0) {
             play_state = RUN;
+            play_anim = run_anim;
+            if (key_hit(KEY_LEFT))
+                play_anim_counter = 0;
             playxdirection = -1;
             if (playxv > -PLAY_TOP_X_SPEED) {
                 playxv -= PLAY_X_ACCEL;
@@ -97,12 +101,18 @@ void play_movement() {
             }
         } else if (key_tri_horz() > 0) {
             play_state = RUN;
+            play_anim = run_anim;
+            if (key_hit(KEY_RIGHT))
+                play_anim_counter = 0;
             playxdirection = 1;
             if (playxv < PLAY_TOP_X_SPEED) {
                 playxv += PLAY_X_ACCEL;
             } else {
                 playxv = PLAY_TOP_X_SPEED;
             }
+        } else if (key_released(KEY_LEFT) || key_released(KEY_RIGHT)) {
+            play_anim = stand_anim;
+            play_frame_index = 0;
         }
     }
     
@@ -195,7 +205,7 @@ void play_movement() {
             //mlog("right col \n");
         #endif
         }
-        if (playx_right > 1024) {
+        if (playx_right > 512) {
             playx -= PIX_TO_SUBPIX(eject_right);
             playxv = PIX_TO_SUBPIX(0);
         }
@@ -303,6 +313,9 @@ void play_movement() {
     }
     
     if (key_hit(KEY_A) && playonground) {
+        play_anim = jump_anim;
+        play_frame_index = 0;
+        play_anim_counter = -1;
         playyv = -PLAY_JUMP_SPEED;
         playonground = 0;
     }
@@ -460,7 +473,7 @@ void play_movement() {
     #ifdef DEBUG
         //mlog("tongx: %x\t", playtongx);
         //mlog("tongy: %x\n", playtongy);
-        mlog("angle: %x\n", playtongangle);
+        //mlog("angle: %x\n", playtongangle);
         //mlog("key velocity: %x\n", key_tri_horz());
         //mlog("x velocity: %x\n", playxv);
         //mlog("y velocity: %x\n", playyv);

@@ -20,8 +20,8 @@ OBJ_AFFINE *obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
 int bgx= 0, bgy= 0;
 
 //player values
-unsigned int playx = PIX_TO_SUBPIX(48), playy = PIX_TO_SUBPIX(32);
-unsigned int playxs = 0, playys = 0; //player x screen, y screen
+int playx = PIX_TO_SUBPIX(48), playy = PIX_TO_SUBPIX(32);
+int playxs = 0, playys = 0; //player x screen, y screen
 int playxv = 0, playyv = 0; //player x velocity, y velocity
 int playxdirection = 1;
 int playydirection = 0;
@@ -30,6 +30,10 @@ int oldplayydirection = 0;
 unsigned int playonground = 0;
 enum grab_state playgrabbing = NONE;
 enum player_state play_state = STAND;
+const s16* play_frame = coqman__stand_0;
+unsigned int play_frame_index = 0;
+const struct spranim_data* play_anim = stand_anim;
+int play_anim_counter = -1;
 
 unsigned int playtongx[4], playtongy[4];
 unsigned int playtongxs[4], playtongys[4];
@@ -38,6 +42,8 @@ s16 playtongangle = 0;
 s16 playtonganglegoal = 0;
 s16 playtonganglev = 0;
 int playtonglength = 0;
+
+unsigned int metaspritesize = 0;
 
 void init_tiles() {
 	// Load palette
@@ -72,25 +78,49 @@ void init_play() {
     obj_hide_multi(&obj_buffer[0], 4);
 }
 
-void metasprite_build(unsigned int oamindex, unsigned int x, unsigned int y, const u16 * frame, unsigned int hflip, unsigned int vflip) {
+void metasprite_build(unsigned int oamindex, unsigned int x, unsigned int y, const s16 * frame, unsigned int hflip, unsigned int vflip) {
     //always know how many sprites each metasprite frame takes before calling
-    for (int i = 0, j = 0; i < (sizeof(frame)<<1); i+=4, j++){
+    obj_hide_multi(&obj_buffer[oamindex], metaspritesize);
+    int i = 1;
+    int j = 0;
+    while (frame[i] >= 0){
         obj_set_attr(&obj_buffer[oamindex + j], ((frame[i+3] & 0b0011000000000000) << 2), ((frame[i+3] & ATTR1_SIZE_MASK)) | (hflip << 12) | (vflip << 13), frame[i+2]);
         #ifdef DEBUG
-        mlog("sprite number: %d", oamindex+j);
-        mlog("metasprite size: %d", (sizeof(frame)<<1));
-        mlog("sprite shape: %x", ((frame[i+3] & 0b0011000000000000) << 2)); //attr0 shape mask is shifted right 2 bits and then shifted left again
-        mlog("sprite size: %x", ((frame[i+3] & ATTR1_SIZE_MASK)));
+        //mlog("sprite number: %d", oamindex+j);
+        //mlog("metasprite size: %d", (sizeof(frame)<<1));
+        //mlog("sprite shape: %x", ((frame[i+3] & 0b0011000000000000) << 2)); //attr0 shape mask is shifted right 2 bits and then shifted left again
+        //mlog("sprite size: %x", ((frame[i+3] & ATTR1_SIZE_MASK)));
         #endif
-        obj_set_pos(&obj_buffer[oamindex + j], x + frame[i+1+(hflip*(sizeof(frame)<<1))], y + frame[i+(vflip*(sizeof(frame)<<2))]);
+        obj_set_pos(&obj_buffer[oamindex + j], x + frame[i+1+(hflip*frame[0])], y + frame[i+(vflip*(frame[0] << 1))]);
+        i+=4;
+        j++;
+        metaspritesize = j;
+    }
+}
+
+void play_animate() {
+    if (play_anim_counter > 0){
+        play_anim_counter--;
+    } else if (play_anim_counter == 0) {
+        if (play_anim[play_frame_index].duration > 0){
+            play_frame_index++;
+            if (play_anim[play_frame_index].duration <= 0)
+                play_frame_index = 0;
+        } else
+            play_frame_index = 0;
+        play_frame = play_anim[play_frame_index].anim_pointer;
+        play_anim_counter = play_anim[play_frame_index].duration;
+        #ifdef DEBUG
+        mlog("player frame index: %d", play_frame_index);
+        #endif
     }
 }
 
 void play_update() {
     if (playxdirection < 0) {
-        metasprite_build(4, playxs - 8, playys - 8, coqman__stand_0, 1, 0);
+        metasprite_build(4, playxs - 8, playys - 8, play_frame, 1, 0);
     } else {
-        metasprite_build(4, playxs - 8, playys - 8, coqman__stand_0, 0, 0);
+        metasprite_build(4, playxs - 8, playys - 8, play_frame, 0, 0);
     }
     if (playgrabbing != NONE) {
         obj_unhide(&obj_buffer[0], ATTR0_AFF);
@@ -175,6 +205,7 @@ int main() {
 		REG_BG0HOFS= bgx;
 		REG_BG0VOFS= bgy;
         
+        play_animate();
         play_update();
         
         oam_copy(oam_mem, obj_buffer, 9);	// only need to update a few
