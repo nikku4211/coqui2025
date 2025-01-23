@@ -22,17 +22,13 @@ def main(argv):
             cheader.write("#include \"main.h\"\n")
             
             for i in range(len(sheetdata["frames"])):
-                tobecount = 1
+                tobecount = 0
                 carraytobe = []
-                carraytobe += ["const u16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[] = {\n"]
-                carraytobeh = []
-                carraytobev = []
-                carraytobehv = []
-                print("frame " + str(i))
+                carraytobe += ["const struct sprframe_data " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[] = {\n"]
+                #print("frame " + str(i))
                 spritestepv = 64
                 j = 0
-                je = sheetdata["frames"][i]["spriteSourceSize"]["h"] - sheetdata["frames"][i]["spriteSourceSize"]["y"]
-                jhw = 0
+                je = sheetdata["frames"][i]["spriteSourceSize"]["h"] - sheetdata["frames"][i]["spriteSourceSize"]["y"] + 8
                 while j < sheetdata["frames"][i]["spriteSourceSize"]["h"]:
                     if 32 <= (sheetdata["frames"][i]["spriteSourceSize"]["h"] - j) < 64:
                         spritestepv = 32
@@ -43,15 +39,15 @@ def main(argv):
                         
                     je -= spritestepv
                     
-                    print("y " + str(spritestepv))
+                    #print("y " + str(spritestepv))
                     
                     if spritestepv > 16:
                         spritesteph = 64
                     else:
                         spritesteph = 32
                     k = 0
-                    ke = sheetdata["frames"][i]["spriteSourceSize"]["w"] - sheetdata["frames"][i]["spriteSourceSize"]["x"]
-                    khw = 0
+                    ke = sheetdata["frames"][i]["spriteSourceSize"]["w"] - sheetdata["frames"][i]["spriteSourceSize"]["x"] + 8
+                    #print("x end " + str(sheetdata["frames"][i]["spriteSourceSize"]["w"]))
                     while k < sheetdata["frames"][i]["spriteSourceSize"]["w"]:
                         if 32 <= (sheetdata["frames"][i]["spriteSourceSize"]["w"] - k) < 64:
                             spritesteph = 32
@@ -67,33 +63,32 @@ def main(argv):
                         else:
                             spriteshape = "(ATTR0_SQUARE >> 2)"
                         ke -= spritesteph
-                        print(str(spritesteph) + " by " + str(spritestepv))
-                        carraytobe += [str(j + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(k + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(round(((sheetdata["frames"][i]["frame"]["y"] + j) * 4) + (sheetdata["frames"][i]["frame"]["x"] + k) / 8)) + ","  + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ",\n"]
-                        carraytobeh += [str(j + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(ke + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(round(((sheetdata["frames"][i]["frame"]["y"] + j) * 4) + (sheetdata["frames"][i]["frame"]["x"] + ke) / 8)) + ","  + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ",\n"]
-                        carraytobev += [str(je + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(k + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(round(((sheetdata["frames"][i]["frame"]["y"] + je) * 4) + (sheetdata["frames"][i]["frame"]["x"] + k) / 8)) + ","  + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ",\n"]
-                        tobecount += 12
+                        #print(str(spritesteph) + " by " + str(spritestepv))
+                        carraytobe += ["{" + str(tobecount) + ", {" + str(j + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + ", " + str(je + sheetdata["frames"][i]["spriteSourceSize"]["y"]) + "}, {" + str(k + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + ", " + str(ke + sheetdata["frames"][i]["spriteSourceSize"]["x"]) + "}, " + str(round(((sheetdata["frames"][i]["frame"]["y"] + j) * 64) + (sheetdata["frames"][i]["frame"]["x"] + k) * 2)) + ", " + spriteshape + " | ATTR1_SIZE_" + str(spritesteph) + "x" + str(spritestepv) + ", " + str((j * 4) + (k // 8)) + "},\n"]
+                        tobecount += 1
                         k += spritesteph
-                        khw += 4
                     j += spritestepv
-                    jhw += 1
-                tobecount += 3
-                carraytobe += ["-1,\n"]
-                carraytobeh += ["-1,\n"]
-                carraytobev += ["-1,\n"]
-                carraytobe[0] = "const s16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "] = {\n" + str((jhw*khw)+1) + ",\n"
+                    
+                tobecount += 1
+                carraytobe += ["{-1,{0,0},{0,0},0,0,0},\n"]
+                carraytobe[0] = "const struct sprframe_data " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "] = {\n"
                 
-                cheader.write("extern const s16 " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "];\n")
-                carray.write(" ".join(carraytobe) + " ".join(carraytobeh) + " ".join(carraytobev) + " ".join(carraytobehv) + "};\n")
+                cheader.write("extern const struct sprframe_data " + sheetdata["frames"][i]["filename"].replace(" ","_").replace("#","_") + "[" + str(tobecount) + "];\n")
+                carray.write(" ".join(carraytobe) + "};\n")
                 
             for i in range(len(sheetdata["meta"]["frameTags"])):
                 carray.write("const struct spranim_data " + sheetdata["meta"]["frameTags"][i]["name"].replace(" ","_") + "_anim[" + str((sheetdata["meta"]["frameTags"][i]["to"] - sheetdata["meta"]["frameTags"][i]["from"]) + 2) + "] = {\n")
                 cheader.write("extern const struct spranim_data " + sheetdata["meta"]["frameTags"][i]["name"].replace(" ","_") + "_anim[" + str((sheetdata["meta"]["frameTags"][i]["to"] - sheetdata["meta"]["frameTags"][i]["from"]) + 2) + "];\n")
                 for j in range(sheetdata["meta"]["frameTags"][i]["from"], sheetdata["meta"]["frameTags"][i]["to"] + 1):
                     carray.write("{" + sheetdata["frames"][j]["filename"].replace(" ","_").replace("#","_") + ", ")
-                    if (sheetdata["meta"]["frameTags"][i]["to"] + 1) - sheetdata["meta"]["frameTags"][i]["from"] > 1:
+                    
+                    if j != sheetdata["meta"]["frameTags"][i]["to"]:
                         carray.write(str(round(sheetdata["frames"][j]["duration"]/(1000/60))) + "},\n")
                     else:
-                        carray.write("-1},\n")
+                        if "repeat" not in sheetdata["meta"]["frameTags"][i]:
+                            carray.write(str(round(sheetdata["frames"][j]["duration"]/(1000/60))) + "},\n")
+                        elif "repeat" in sheetdata["meta"]["frameTags"][i]:
+                            carray.write("-1},\n")
                 
                 carray.write("{" + sheetdata["frames"][0]["filename"].replace(" ","_").replace("#","_") +", 0}\n};\n")
                 

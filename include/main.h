@@ -49,6 +49,7 @@
 #define PLAY_TONG_X_OFS PIX_TO_SUBPIX(4)
 #define PLAY_TONG_Y_OFS PIX_TO_SUBPIX(4)
 #define PLAY_TONG_X_END_OFS PIX_TO_SUBPIX(8)
+#define PLAY_SWINGFALL_DURATION 6
 
 //player states
 enum player_state {
@@ -77,10 +78,13 @@ extern int playydirection;
 extern unsigned int playonground;
 extern enum grab_state playgrabbing;
 extern enum player_state play_state;
-extern const s16* play_frame;
+extern const struct sprframe_data* play_frame;
 extern unsigned int play_frame_index;
 extern const struct spranim_data* play_anim;
+extern const struct spranim_data* play_cur_anim;
 extern int play_anim_counter;
+extern int play_cur_anim_counter;
+extern unsigned int play_swingfall_counter;
 
 extern unsigned int playtongx[4], playtongy[4];
 extern unsigned int playtongxs[4], playtongys[4];
@@ -91,6 +95,15 @@ extern s16 playtonganglev;
 extern int playtonglength;
 
 struct spranim_data {
-    const s16 * const anim_pointer;
+    const struct sprframe_data * anim_pointer;
     s16 duration;
+};
+
+struct sprframe_data {
+    s16 spr_num;
+    s16 dy[2];
+    s16 dx[2];
+    u16 rom_tile_index;
+    u16 shapesize;
+    u16 vram_tile_index;
 };

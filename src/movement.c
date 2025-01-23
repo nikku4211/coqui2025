@@ -91,9 +91,6 @@ void play_movement() {
         if (key_tri_horz() < 0) {
             if (playonground){
                 play_state = RUN;
-                play_anim = run_anim;
-                if (key_hit(KEY_LEFT))
-                    play_anim_counter = 0;
             }
             playxdirection = -1;
             if (playxv > -PLAY_TOP_X_SPEED) {
@@ -104,9 +101,6 @@ void play_movement() {
         } else if (key_tri_horz() > 0) {
             if (playonground){
                 play_state = RUN;
-                play_anim = run_anim;
-                if (key_hit(KEY_RIGHT))
-                    play_anim_counter = 0;
             }
             playxdirection = 1;
             if (playxv < PLAY_TOP_X_SPEED) {
@@ -114,9 +108,6 @@ void play_movement() {
             } else {
                 playxv = PLAY_TOP_X_SPEED;
             }
-        } else if (key_released(KEY_LEFT) || key_released(KEY_RIGHT)) {
-            play_anim = stand_anim;
-            play_frame_index = 0;
         }
     }
     
@@ -254,10 +245,7 @@ void play_movement() {
             (!collision_up) && \
             playy_down < 1024
             ){
-                play_anim = stand_anim;
-                play_frame_index = 0;
-                play_frame = coqman__stand_0;
-                play_anim_counter = -1;
+                
                 
                 playonground = 1;
                 playy -= PIX_TO_SUBPIX(eject_down);
@@ -265,13 +253,6 @@ void play_movement() {
             #ifdef DEBUG
                 //mlog("down slow col\n");
             #endif
-            } else {
-                play_anim = jump_anim;
-                if (play_anim != jump_anim){
-                    play_frame_index = 0;
-                
-                    play_anim_counter = 1;
-                }
             }
         } else {
             if ((!collision_down)){
@@ -315,10 +296,6 @@ void play_movement() {
         (!collision_up) && \
         playy_down < 1024
         ){
-            play_anim = stand_anim;
-            play_frame_index = 0;
-            play_frame = coqman__stand_0;
-            play_anim_counter = -1;
             
             playonground = 1;
             playy -= PIX_TO_SUBPIX(eject_down);
@@ -326,13 +303,6 @@ void play_movement() {
         #ifdef DEBUG
             //mlog("down slow col\n");
         #endif
-        } else {
-            play_anim = jump_anim;
-            if (play_anim != jump_anim){
-                play_frame_index = 0;
-            
-                play_anim_counter = 1;
-            }
         }
     } else {
         if ((!collision_down)){
@@ -340,11 +310,14 @@ void play_movement() {
         }
     }
     
+    if (play_state == SWINGFALL){
+        if (play_swingfall_counter > 0)
+            play_swingfall_counter--;
+        else
+            play_state = FALL;
+    }
+    
     if (key_hit(KEY_A) && playonground) {
-        play_anim = jump_anim;
-        play_frame_index = 0;
-        play_frame = coqman__jump_0;
-        play_anim_counter = -1;
         playyv = -PLAY_JUMP_SPEED;
         playonground = 0;
     }
@@ -366,7 +339,7 @@ void play_movement() {
     }
     
     if (key_hit(KEY_R))
-            playtongangle = playtonganglegoal;
+        playtongangle = playtonganglegoal;
     if (key_held(KEY_R)) {
         if (play_state != SWINGFALL){
             int playtonganglecos;
@@ -450,6 +423,8 @@ void play_movement() {
                 
                 playtonganglev = fxmul(playtonganglev, 253);
                 
+                play_state = GRAB;
+                
             #ifdef DEBUG
                 //mlog("pendulum force: %x\n", playtonganglev);
             #endif
@@ -479,6 +454,7 @@ void play_movement() {
                 if (key_hit(KEY_A)) {
                     play_state = SWINGFALL;
                     playgrabbing = NONE;
+                    play_swingfall_counter = PLAY_SWINGFALL_DURATION;
                     
                     playtonglength = 0;
                     playtongv = 0;
@@ -491,12 +467,83 @@ void play_movement() {
         }
     } else if (key_released(KEY_R)) {
         playgrabbing = NONE;
-        
+        play_state = FALL;
         playtonglength = 0;
         playtongv = 0;
         //set the player velocities to play nice with deceleration code
         playyv &= 0xfffffff0;
         playxv &= 0xfffffff0;
+    }
+    
+    switch(play_state){
+        case STAND:
+            play_anim = stand_anim;
+            play_frame_index = 0;
+        break;
+        case RUN:
+            play_anim = run_anim;
+            if (play_cur_anim != run_anim){
+                play_frame_index = 0;
+            }
+        break;
+        case FALL:
+            play_anim = jump_anim;
+            if (playyv < 0){
+                play_frame_index = 2;
+            } else if (playyv == 0) {
+                play_anim_counter = play_anim[play_frame_index].duration;
+            }
+            if (play_cur_anim != jump_anim){
+                play_frame_index = 0;
+            }
+            #ifdef DEBUG
+                //mlog("play frame index: %d", play_frame_index);
+            #endif
+        break;
+        case SWINGFALL:
+            play_anim = jump_anim;
+            if (playyv < 0){
+                play_frame_index = 2;
+            } else if (playyv == 0) {
+                play_anim_counter = play_anim[play_frame_index].duration;
+            }
+            if (play_cur_anim != jump_anim){
+                play_frame_index = 0;
+            }
+            #ifdef DEBUG
+                //mlog("play frame index: %d", play_frame_index);
+            #endif
+        break;
+        case GRAB:
+            if (playonground){
+                play_anim = coqtong_anim;
+                play_frame_index = 0;
+            } else {
+                play_anim = tongjump_anim;
+                if (playyv < 0){
+                    play_frame_index = 2;
+                } else if (playyv == 0) {
+                    play_anim_counter = play_anim[play_frame_index].duration;
+                }
+                if (play_cur_anim != tongjump_anim){
+                    play_frame_index = 0;
+                }
+            }
+        break;
+        case SWING:
+            play_anim = tongjump_anim;
+            if (playyv < 0){
+                play_frame_index = 2;
+            } else if (playyv == 0) {
+                play_anim_counter = play_anim[play_frame_index].duration;
+            }
+            if (play_cur_anim != tongjump_anim){
+                play_frame_index = 0;
+            }
+        break;
+        default:
+            play_anim = stand_anim;
+            play_frame_index = 0;
     }
     
     #ifdef DEBUG
@@ -516,7 +563,7 @@ void play_movement() {
     playtongys[2] = SUBPIX_TO_PIX(playtongy[2]) - bgy;
     playtongxs[3] = SUBPIX_TO_PIX(playtongx[3]) - bgx;
     playtongys[3] = SUBPIX_TO_PIX(playtongy[3]) - bgy;
-#ifdef DEBUG
-    //mlog("%d", play_state);
-#endif
+    #ifdef DEBUG
+        mlog("%d", play_state);
+    #endif
 }

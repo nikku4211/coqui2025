@@ -30,10 +30,13 @@ int oldplayydirection = 0;
 unsigned int playonground = 0;
 enum grab_state playgrabbing = NONE;
 enum player_state play_state = STAND;
-const s16* play_frame = coqman__stand_0;
+const struct sprframe_data* play_frame = coqman__stand_0;
 unsigned int play_frame_index = 0;
 const struct spranim_data* play_anim = stand_anim;
+const struct spranim_data* play_cur_anim = stand_anim;
 int play_anim_counter = -1;
+int play_cur_anim_counter = 0;
+unsigned int play_swingfall_counter = 0;
 
 unsigned int playtongx[4], playtongy[4];
 unsigned int playtongxs[4], playtongys[4];
@@ -56,63 +59,71 @@ void init_play() {
     //load player palette
     memcpy32(&pal_obj_mem[0], coqmansheet_pal, (sizeof(coqmansheet_pal) >> 2));
     //Load player tiles
-    memcpy32(&tile_mem_obj[0][0], coqmansheet_char, (sizeof(coqmansheet_char) >> 2));
+    //memcpy32(&tile_mem_obj[0][0], coqmansheet_char, (sizeof(coqmansheet_char) >> 2));
+    
+    //Load player tongue
+    memcpy32(&tile_mem_obj[0][5], coqmansheet_char+(coqman__tongalone_0[0].rom_tile_index), 16);
+    memcpy32(&tile_mem_obj[0][37], coqmansheet_char+(coqman__tongalone_0[0].rom_tile_index)+512, 16);
+    memcpy32(&tile_mem_obj[0][7], coqmansheet_char+(coqman__tongalone_1[0].rom_tile_index), 8);
     
     //player tongue
-    obj_set_attr(&obj_buffer[0], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_8 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 630);
+    obj_set_attr(&obj_buffer[0], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_8 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 7);
     obj_set_pos(&obj_buffer[0], 60, 4);
     obj_aff_identity(&obj_aff_buffer[0]);
     
-    obj_set_attr(&obj_buffer[1], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 628);
+    obj_set_attr(&obj_buffer[1], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 5);
     obj_set_pos(&obj_buffer[1], 44, 0);
-    obj_aff_identity(&obj_aff_buffer[1]);
     
-    obj_set_attr(&obj_buffer[2], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 628);
+    obj_set_attr(&obj_buffer[2], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 5);
     obj_set_pos(&obj_buffer[2], 28, 0);
-    obj_aff_identity(&obj_aff_buffer[2]);
     
-    obj_set_attr(&obj_buffer[3], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 628);
+    obj_set_attr(&obj_buffer[3], ATTR0_SQUARE | ATTR0_AFF, ATTR1_SIZE_16 | ATTR1_AFF_ID(0), ATTR2_PALBANK(0) | 5);
     obj_set_pos(&obj_buffer[3], 12, 0);
-    obj_aff_identity(&obj_aff_buffer[3]);
     
     obj_hide_multi(&obj_buffer[0], 4);
 }
 
-void metasprite_build(unsigned int oamindex, unsigned int x, unsigned int y, const s16 * frame, unsigned int hflip, unsigned int vflip) {
+void metasprite_build(unsigned int oamindex, unsigned int x, unsigned int y, const struct sprframe_data * frame, unsigned int hflip, unsigned int vflip) {
     //always know how many sprites each metasprite frame takes before calling
     obj_hide_multi(&obj_buffer[oamindex], metaspritesize);
-    int i = 1;
-    int j = 0;
-    while (frame[i] >= 0){
-        obj_set_attr(&obj_buffer[oamindex + j], ((frame[i+3] & 0b0011000000000000) << 2), ((frame[i+3] & ATTR1_SIZE_MASK)) | (hflip << 12) | (vflip << 13), frame[i+2]);
+    int i = 0;
+    for (int j = 0; j < 2560; j+=512){
+        memcpy32(&tile_mem_obj[0][j >> 4], coqmansheet_char+(frame[0].rom_tile_index)+j, 40);
+    }
+    while (frame[i].spr_num >= 0){
+        obj_set_attr(&obj_buffer[oamindex + i], ((frame[i].shapesize & 0b0011000000000000) << 2), ((frame[i].shapesize & ATTR1_SIZE_MASK)) | (hflip << 12) | (vflip << 13), frame[i].vram_tile_index);
         #ifdef DEBUG
         //mlog("sprite number: %d", oamindex+j);
         //mlog("metasprite size: %d", (sizeof(frame)<<1));
         //mlog("sprite shape: %x", ((frame[i+3] & 0b0011000000000000) << 2)); //attr0 shape mask is shifted right 2 bits and then shifted left again
-        //mlog("sprite size: %x", ((frame[i+3] & ATTR1_SIZE_MASK)));
+        //mlog("sprite size: %x words", frame[i].vram_tile_index << 4);
         #endif
-        obj_set_pos(&obj_buffer[oamindex + j], x + frame[i+1+(hflip*frame[0])], y + frame[i+(vflip*(frame[0] << 1))]);
-        i+=4;
-        j++;
-        metaspritesize = j;
+        obj_set_pos(&obj_buffer[oamindex + i], x + frame[i].dx[hflip], y + frame[i].dy[vflip]);
+        i++;
+        metaspritesize = i;
     }
 }
 
 void play_animate() {
-    if (play_anim_counter > 0){
-        play_anim_counter--;
-    } else if (play_anim_counter == 0) {
+    if (play_cur_anim_counter > 0){
+        play_cur_anim_counter--;
+    } else if (play_cur_anim_counter == 0) {
         if (play_anim[play_frame_index].duration > 0){
             play_frame_index++;
-            if (play_anim[play_frame_index].duration <= 0)
+            if (play_anim[play_frame_index].duration == 0)
                 play_frame_index = 0;
         } else
             play_frame_index = 0;
         play_frame = play_anim[play_frame_index].anim_pointer;
-        play_anim_counter = play_anim[play_frame_index].duration;
+        play_cur_anim_counter = play_anim[play_frame_index].duration;
         #ifdef DEBUG
-        mlog("player frame index: %d", play_frame_index);
+        //mlog("player frame index: %d", play_frame_index);
         #endif
+        play_cur_anim = play_anim;
+    } else {
+        if (play_cur_anim != play_anim) {
+            play_cur_anim_counter = 1;
+        }
     }
 }
 
