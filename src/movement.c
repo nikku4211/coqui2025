@@ -21,7 +21,7 @@ unsigned int is_colliding_aabb(unsigned int x1, unsigned int y1, unsigned int wi
 }
 
 unsigned int is_colliding_bg(unsigned int x, unsigned int y){
-    unsigned int metatile_loc = ((x >> 4) & 0x0f) + (y & 0xf0) + (x & 0xffff00) + ((y << 1) & 0xfffe00);
+    unsigned int metatile_loc = (x >> 4) + ((y >> 4) * y_index);
     unsigned int metatile_typ = (u8)testmap_tilemap[metatile_loc];
     return debug_metatile_collisions[metatile_typ];
 }
@@ -564,6 +564,6 @@ void play_movement() {
     playtongxs[3] = SUBPIX_TO_PIX(playtongx[3]) - bgx;
     playtongys[3] = SUBPIX_TO_PIX(playtongy[3]) - bgy;
     #ifdef DEBUG
-        mlog("%d", play_state);
+        //mlog("%d", play_state);
     #endif
 }

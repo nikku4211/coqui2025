@@ -18,6 +18,8 @@ OBJ_AFFINE *obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
 
 // Scroll around some
 int bgx= 0, bgy= 0;
+int y_index;
+int y_total;
 
 //player values
 int playx = PIX_TO_SUBPIX(48), playy = PIX_TO_SUBPIX(32);
@@ -160,19 +162,84 @@ void play_update() {
 void init_map() {
     u32 *dst = (u32*)se_mem;
     u32 *src = (u32*)debug_metatiles;
+    
+    y_index = testmap_tilemap_width;
+    y_total = testmap_tilemap_width * testmap_tilemap_height;
     //each tilemap entry within a screenblock is 2 bytes (1 halfword)
     
     //each metatile is defined as 4 tilemap entries, which is 8 bytes, 4 halfwords, and 2 full words
     
     //we are reading one byte and then writing 4 bytes (1 full word)
-    for (int j = 0; j < 2048; j += 512){ //all 4 screenblocks combined have 4096 tiles or 1024 metatiles
-        for (int y = 0; y < 512; y += 32){ //each screenblock has 1024 tiles or 256 metatiles
-            for (int x = 0; x < 16; x++){ //each screenblock is 32 tiles across or 16 metatiles across
-                dst[(x) + (y) + (j) + (28*512)] = src[((u8)testmap_tilemap[(x) + (y>>1) + (j>>1)]<<1)];
-                dst[(x) + (y+16) + (j) + (28*512)] = src[((u8)testmap_tilemap[(x) + (y>>1) + (j>>1)]<<1)+1];
+    //for (int j = 0; j < 2048; j += 512){ //all 4 screenblocks combined have 4096 tiles or 1024 metatiles
+        for (int y = 0, ys = 0; y < 512; y += 32, ys += y_index){
+            for (int x = 0; x < 16; x++){
+                dst[(x) + (y) + (28*512)] = src[((u8)testmap_tilemap[(x) + (ys)]<<1)];
+                dst[(x) + (y+16) + (28*512)] = src[((u8)testmap_tilemap[(x) + (ys)]<<1)+1];
             }
         }
+    //}
+}
+
+void map_update() {
+    u32 *dst = (u32*)se_mem;
+    u32 *src = (u32*)debug_metatiles;
+    
+    int bgysb_top = bgy - 16;
+    int bgysb_bottom = bgy + 176;
+    int bgxsb_left = (bgx >> 4);
+    int bgxsb_right = ((bgx+240) >> 4);
+    
+    int bgys_top = ((bgy - 16) >> 4) * y_index;
+    int bgys_bottom = ((bgy + 176) >> 4) * y_index;
+    int bgxs_left = bgx >> 4;
+    int bgxs_right = (bgx+240) >> 4;
+    
+    #ifdef DEBUG
+        mlog("bgys top: %x", ((bgysb_top & 0xf0) << 1));
+        mlog("bgys bottom: %x", ((bgysb_bottom & 0xf0) << 1));
+        mlog("bgys left: %x", (bgxsb_left & 0x0f));
+        mlog("bgys right: %x", (bgxsb_right & 0x0f));
+    #endif
+    
+    int ys = bgys_bottom;
+    int y = bgysb_bottom;
+    //for (int y = 0; y < 512; y += 32){ //each screenblock has 1024 tiles or 256 metatiles
+        for (int x = bgxsb_left, xs = bgxs_left; xs < bgxs_right; x++, xs++){ //each screenblock is 32 tiles across or 16 metatiles across
+            dst[(x & 0x0f) + ((y & 0xf0) << 1) + (28*512)] = src[((u8)testmap_tilemap[(xs) + (ys)]<<1)];
+            dst[(x & 0x0f) + (((y & 0xf0) << 1) + 16) + (28*512)] = src[((u8)testmap_tilemap[(xs) + (ys)]<<1)+1];
+        }
+    //}
+    
+    ys = bgys_top;
+    y = bgysb_top;
+    
+    //for (int y = 0; y < 512; y += 32){
+        for (int x = bgxsb_left, xs = bgxs_left; xs < bgxs_right; x++, xs++){
+            dst[(x & 0x0f) + ((y & 0xf0) << 1) + (28*512)] = src[((u8)testmap_tilemap[(xs) + (ys)]<<1)];
+            dst[(x & 0x0f) + (((y & 0xf0) << 1) + 16) + (28*512)] = src[((u8)testmap_tilemap[(xs) + (ys)]<<1)+1];
+        }
+    //}
+    
+    int x = bgxsb_left;
+    int xs = bgxs_left;
+    
+    for (y = bgysb_top, ys = bgys_top; ys < bgys_bottom; y += 16, ys += y_index){
+        //for (int x = 0; x < 16; x++){
+            dst[(x & 0x0f) + ((y & 0xf0) << 1) + (28*512)] = src[((u8)testmap_tilemap[(xs) + (ys)]<<1)];
+            dst[(x & 0x0f) + (((y & 0xf0) << 1) + 16) + (28*512)] = src[((u8)testmap_tilemap[(xs) + (ys)]<<1)+1];
+        //}
+    }    
+    
+    x = bgxsb_right;
+    xs = bgxs_right;
+    
+    for (y = bgysb_top, ys = bgys_top; ys < bgys_bottom; y += 16, ys += y_index){
+        //for (int x = 0; x < 16; x++){
+            dst[(x & 0x0f) + ((y & 0xf0) << 1) + (28*512)] = src[((u8)testmap_tilemap[(xs) + (ys)]<<1)];
+            dst[(x & 0x0f) + (((y & 0xf0) << 1) + 16) + (28*512)] = src[((u8)testmap_tilemap[(xs) + (ys)]<<1)+1];
+        //}
     }
+    
 }
 
 IWRAM_CODE void isr_master();
@@ -201,7 +268,7 @@ int main() {
     #ifdef DEBUG
     mlog("Game start.\n");
     #endif
-    REG_BG0CNT= BG_CBB(0) | BG_SBB(28) | BG_4BPP | BG_REG_64x64;
+    REG_BG0CNT= BG_CBB(0) | BG_SBB(28) | BG_4BPP | BG_REG_32x32;
     REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_2D;
     
     while(1){
@@ -215,6 +282,9 @@ int main() {
 
 		REG_BG0HOFS= bgx;
 		REG_BG0VOFS= bgy;
+        
+        
+        map_update();
         
         play_animate();
         play_update();

@@ -10,7 +10,7 @@
 #define PLAY_DOWN_SCROLL_AREA 64
 
 #define SCROLL_LIMIT_RIGHT 272
-#define SCROLL_LIMIT_DOWN 336
+#define SCROLL_LIMIT_DOWN 352
 
 #define PIX_TO_SUBPIX(n) ((n) << 8)
 #define SUBPIX_TO_PIX(n) ((n) >> 8)
@@ -70,6 +70,8 @@ enum grab_state {
 
 // Scroll around some
 extern int bgx, bgy;
+extern int y_index, y_total;
+
 extern int playx, playy;
 extern int playxs, playys; //player x screen, y screen
 extern int playxv, playyv; //player x velocity, y velocity
