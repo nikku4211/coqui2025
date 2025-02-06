@@ -7,7 +7,7 @@
 #include "main.h"
 
 #include "metatiles.h"
-#include "testmap_tilemap.h"
+#include "testmap.h"
 #include "coqmansheet_metasprite.h"
 
 unsigned int is_colliding_aabb(unsigned int x1, unsigned int y1, unsigned int width1, unsigned int height1, \
@@ -449,7 +449,7 @@ void play_movement() {
                 playtongy[2] = (24 * playtonganglesin) + playtongy[0] - PLAY_TONG_Y_OFS;
                 playtongx[3] = (12 * playtonganglecos) + playtongx[0] - PLAY_TONG_X_OFS;
                 playtongy[3] = (12 * playtonganglesin) + playtongy[0] - PLAY_TONG_Y_OFS;
-                playx = (SUBPIX_TO_PIX(playtonglength) * playtonganglecos) + playtongx[0] - PLAY_TONG_X_END_OFS;
+                playx = (SUBPIX_TO_PIX(playtonglength) * playtonganglecos) + playtongx[0] - PLAY_TONG_X_OFS;
                 playy = (SUBPIX_TO_PIX(playtonglength) * playtonganglesin) + playtongy[0] - PLAY_TONG_Y_OFS;
                 if (key_hit(KEY_A)) {
                     play_state = SWINGFALL;

@@ -70,6 +70,7 @@ enum grab_state {
 
 // Scroll around some
 extern int bgx, bgy;
+extern int obgx, obgy;
 extern int y_index, y_total;
 
 extern int playx, playy;
@@ -87,6 +88,7 @@ extern const struct spranim_data* play_cur_anim;
 extern int play_anim_counter;
 extern int play_cur_anim_counter;
 extern unsigned int play_swingfall_counter;
+extern int play_health;
 
 extern unsigned int playtongx[4], playtongy[4];
 extern unsigned int playtongxs[4], playtongys[4];
@@ -108,4 +110,52 @@ struct sprframe_data {
     u16 rom_tile_index;
     u16 shapesize;
     u16 vram_tile_index;
+};
+
+//enemy values
+
+#define ENEMY_TOTAL 2
+struct entity {
+    int x;
+    int xs;
+    int y;
+    int ys;
+    int xv;
+    int yv;
+    int xdirection;
+    int ydirection;
+    int onground;
+    int isgrabbed;
+    const struct sprframe_data* frame;
+    unsigned int frame_index;
+    const struct spranim_data* anim;
+    const struct spranim_data* cur_anim;
+    int anim_counter;
+    int cur_anim_counter;
+    int health;
+};
+
+extern struct entity enemies[ENEMY_TOTAL];
+
+enum sprite_type {
+    BLANK,
+    PLAYER,
+    ENEMY_PATROL,
+    ENEMY_SENTRY,
+    TURN_OFF
+};
+
+//sprite placement
+struct level_entity {
+    u16 ty;
+    u16 tx;
+    enum sprite_type type;
+};
+
+//level struct
+struct level_header {
+    u16 width;
+    u16 height;
+    const u8 * level_data;
+    const struct level_entity * entity_data;
 };

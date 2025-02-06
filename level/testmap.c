@@ -1,7 +1,6 @@
 #include <tonc.h>
+#include "main.h"
 
-const u16 testmap_tilemap_width = 32;
-const u16 testmap_tilemap_height = 32;
 const u8 testmap_tilemap[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -35,4 +34,17 @@ const u8 testmap_tilemap[] = {
 2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,11,
 11,16,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,17,11,
 11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,
+};
+
+const struct level_entity testmap_sprites[] = {
+{27, 1, PLAYER},
+{28, 6, ENEMY_PATROL},
+{2, 21, ENEMY_SENTRY},
+{0, 0, TURN_OFF}
+};
+const struct level_header testmap = {
+32,
+32,
+testmap_tilemap,
+testmap_sprites
 };

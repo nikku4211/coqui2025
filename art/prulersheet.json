@@ -1,0 +1,278 @@
+{ "frames": [
+   {
+    "filename": "pruler__stand_0",
+    "frame": { "x": 32, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__unsheathe_0",
+    "frame": { "x": 48, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 66
+   },
+   {
+    "filename": "pruler__unsheathe_1",
+    "frame": { "x": 192, "y": 0, "w": 16, "h": 40 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 0, "w": 16, "h": 40 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 66
+   },
+   {
+    "filename": "pruler__unsheathe_2",
+    "frame": { "x": 208, "y": 0, "w": 16, "h": 40 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 0, "w": 16, "h": 40 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 166
+   },
+   {
+    "filename": "pruler__unsheathe_3",
+    "frame": { "x": 224, "y": 0, "w": 16, "h": 40 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 0, "w": 16, "h": 40 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 83
+   },
+   {
+    "filename": "pruler__unsheathe_4",
+    "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 8, "w": 32, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 66
+   },
+   {
+    "filename": "pruler__unsheathe_5",
+    "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 8, "w": 32, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 116
+   },
+   {
+    "filename": "pruler__shoot_0",
+    "frame": { "x": 64, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 8, "y": 8, "w": 32, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 66
+   },
+   {
+    "filename": "pruler__shoot_1",
+    "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 8, "w": 32, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 116
+   },
+   {
+    "filename": "pruler__sheathe_0",
+    "frame": { "x": 64, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 116
+   },
+   {
+    "filename": "pruler__sheathe_1",
+    "frame": { "x": 32, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__walkstart_0",
+    "frame": { "x": 32, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__walkstart_1",
+    "frame": { "x": 80, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__walk_0",
+    "frame": { "x": 96, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__walk_1",
+    "frame": { "x": 112, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__walk_2",
+    "frame": { "x": 128, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__walk_3",
+    "frame": { "x": 144, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__walk_4",
+    "frame": { "x": 160, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__walk_5",
+    "frame": { "x": 176, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__unsheathel_0",
+    "frame": { "x": 32, "y": 32, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 100
+   },
+   {
+    "filename": "pruler__unsheathel_1",
+    "frame": { "x": 192, "y": 40, "w": 16, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 8, "w": 16, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 66
+   },
+   {
+    "filename": "pruler__unsheathel_2",
+    "frame": { "x": 240, "y": 0, "w": 16, "h": 40 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 0, "w": 16, "h": 40 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 66
+   },
+   {
+    "filename": "pruler__unsheathel_3",
+    "frame": { "x": 0, "y": 32, "w": 16, "h": 40 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 0, "w": 16, "h": 40 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 166
+   },
+   {
+    "filename": "pruler__unsheathel_4",
+    "frame": { "x": 16, "y": 32, "w": 16, "h": 40 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 0, "w": 16, "h": 40 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 83
+   },
+   {
+    "filename": "pruler__unsheathel_5",
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 8, "y": 8, "w": 24, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 66
+   },
+   {
+    "filename": "pruler__unsheathel_6",
+    "frame": { "x": 120, "y": 0, "w": 24, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 8, "y": 8, "w": 24, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 116
+   },
+   {
+    "filename": "pruler__shootl_0",
+    "frame": { "x": 144, "y": 0, "w": 24, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 8, "y": 8, "w": 24, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 66
+   },
+   {
+    "filename": "pruler__shootl_1",
+    "frame": { "x": 168, "y": 0, "w": 24, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 8, "y": 8, "w": 24, "h": 32 },
+    "sourceSize": { "w": 48, "h": 40 },
+    "duration": 116
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.11-x64",
+  "image": "prulersheet.png",
+  "format": "RGBA8888",
+  "size": { "w": 256, "h": 72 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "pruler_stand", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "pruler_unsheathe", "from": 1, "to": 6, "direction": "forward", "repeat": "1", "color": "#000000ff" },
+   { "name": "pruler_shoot", "from": 7, "to": 8, "direction": "forward", "repeat": "1", "color": "#000000ff" },
+   { "name": "pruler_sheathe", "from": 9, "to": 10, "direction": "forward", "repeat": "1", "color": "#000000ff" },
+   { "name": "pruler_walkstart", "from": 11, "to": 12, "direction": "forward", "repeat": "1", "color": "#000000ff" },
+   { "name": "pruler_walk", "from": 13, "to": 18, "direction": "forward", "color": "#000000ff" },
+   { "name": "pruler_unsheathel", "from": 19, "to": 25, "direction": "forward", "repeat": "1", "color": "#000000ff" },
+   { "name": "pruler_shootl", "from": 26, "to": 27, "direction": "forward", "repeat": "1", "color": "#000000ff" }
+  ],
+  "layers": [
+   { "name": "shaded", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}
